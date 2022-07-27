@@ -4,6 +4,7 @@ Generate graphviz code for directories denpendency of a go mod project.
 ## Usage
 
 ```bash
+go get -u github.com/sequix/baobab
 git clone https://github.com/sequix/sup.git
 cd sup
 baobab -gomod github.com/sequix/sup -entry cmd
