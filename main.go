@@ -14,6 +14,7 @@ import (
 var (
 	flagEntryDir  = flag.String("entry", "", "directory where to start scan")
 	flagGoModName = flag.String("gomod", "github.com/sequix/baobab", "go mod name")
+	flagDepth     = flag.Int("depth", 0, "max depth, 0 for unlimited")
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 
 func main() {
 	flag.Parse()
-	if err := parseDir(*flagEntryDir); err != nil {
+	if err := parseDir(*flagEntryDir, 0); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("digraph G {")
@@ -31,12 +32,16 @@ func main() {
 		e = strings.ReplaceAll(e, string(os.PathSeparator), "_")
 		e = strings.ReplaceAll(e, "-", "_")
 		e = strings.ReplaceAll(e, " _> ", " -> ")
+		e = strings.ReplaceAll(e, ".", "_")
 		fmt.Println(e)
 	}
 	fmt.Println("}")
 }
 
-func parseDir(dir string) error {
+func parseDir(dir string, depth int) error {
+	if *flagDepth > 0 && depth > *flagDepth {
+		return nil
+	}
 	fis, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return fmt.Errorf("failed to read dir %s: %s", dir, err)
@@ -67,7 +72,7 @@ func parseDir(dir string) error {
 			}
 			edges[fmt.Sprintf("%s -> %s", dir, nextDir)] = struct{}{}
 			if _, parsed := dirsParsed[nextDir]; !parsed {
-				if err := parseDir(nextDir); err != nil {
+				if err := parseDir(nextDir, depth+1); err != nil {
 					return err
 				}
 			}
