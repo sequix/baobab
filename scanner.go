@@ -234,6 +234,7 @@ func lexCommentBlock(l *Scanner) stateFn {
 	if r == eof {
 		return nil
 	}
+	l.start = l.pos
 	return lexAny
 }
 
